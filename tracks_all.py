@@ -30,31 +30,18 @@ DISTANCE = 50                              # distance between way points (to red
 lat=[]
 lon=[]
 elev=[]
-sp=[]
 times=[]
 speed=[]
 points=[]
 dist_per_point=[]
 distance=[]
 cum_elevation=[]
-speed_filt=[]
 dur=[]
-dur_s=[]
-
 
 lat_all=[]
 lon_all=[]
 elev_all=[]
 sp_all=[]
-times_all=[]
-speed_all=[]
-points_all=[]
-dist_per_point_all=[]
-distance_all=[]
-cum_elevation_all=[]
-speed_filt_all=[]
-dur_all=[]
-dur_s_all=[]
 
 # section local functions ----------------------------------------------------------------------------------------
 def f_CalculateData(tmp_df):
@@ -176,7 +163,6 @@ for no,f in enumerate(diff_track_list):
                     distance.append(0)
                     cum_elevation.append(0)
                     dur.append(0)
-                    dur_s.append('00:00:00')
                 else:
                     dist_per_point.append(
                         point.distance_3d(segment.points[point_nr - 1]))  # distance between wasy points
@@ -206,8 +192,6 @@ for no,f in enumerate(diff_track_list):
                         # get the last element and maintain it
                         cum_height = cum_elevation[-1]
                         cum_elevation.append(cum_height)
-
-                dur_s = [str(s) for s in dur]
 
     # for later data processing copy all generated data of each track to temporary pandas data frame
     tmp_df['longitudinal'] = lon
@@ -276,8 +260,8 @@ for no,f in enumerate(diff_track_list):
     elev_all.append(elev)
 
     # reset all lists for next loop
-    lat, lon, elev, cum_elevation, dur, times, dist_per_point, s, speed_filt, distance, speed, dur_s, angle = \
-        [], [], [], [], [], [], [], [], [], [], [], [], []
+    lat, lon, elev, cum_elevation, dur, times, dist_per_point, s, distance, speed, dur_s, angle = \
+        [], [], [], [], [], [], [], [], [], [], [], []
     # reset pandas data frame as well as data per track for next loop
     tmp_df = pd.DataFrame(columns=[])
 
