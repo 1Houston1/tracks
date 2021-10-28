@@ -1,7 +1,5 @@
 import datetime
 import sys
-
-import gpxpy
 import gpxpy.gpx
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,17 +12,20 @@ from tracks_aux import f_CalcAngleDeg,f_FindValuesCloseToMultiple,f_CalWpDistanc
 track_dict = {}                     # ..for entire data of track
 cols_dict={0:'blue',1:'orange',2:'green',3:'red',4:'purple',5:'brown',6:'pink',7:'olive',8:'cyan'}
 
+# set display options for pandas data frame
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
-# pandas dataframe for storing all lists
-tmp_df = pd.DataFrame(columns=[])           # helper data frame
+# create empty pandas dataframe for storing all lists
+tmp_df = pd.DataFrame(columns=[])
 tracks_sum_pd = pd.DataFrame(columns=[])
 
+# constants
+DISTANCE = 50 # distance between way points in m (to reduce the data)
 
-SPEED_THRESH=2
-DISTANCE = 50                              # distance between way points (to reduce the data)
+# file paths's
+FILE_PATH_GPX = 'C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap'
 
 # store the intermediate results in lists
 lat=[]
@@ -106,9 +107,10 @@ def f_CalculateData(tmp_df):
 # main program -----------------------------------------------------------------------------------------------------
 
 # change the directory
-os.chdir('C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap')
+os.chdir(FILE_PATH_GPX)
 
-# read csv of track statistic to check which track has been analyzed
+# read csv of track statistic to check which track has been analyzed so far and to identify later which tracks
+# are newly added in the list
 try:
     tracks_sum_pd = pd.read_csv('tracks_sum.csv',index_col=None)
 except:
@@ -267,26 +269,4 @@ for no,f in enumerate(diff_track_list):
 
 # write data to csv file
 tracks_sum_pd.to_csv('tracks_sum.csv',index=None)
-
-#fig = figure()
-#ax = Axes3D(fig)
-#ax.set_xlabel('lon [°]')
-#ax.set_ylabel('lat [°]')
-#ax.set_zlabel('hight [m]')
-#
-#for i in range(len(lat_all)):
-#    ax.plot(lon_all[i],lat_all[i],elev_all[i],c=cols_dict[i])
-#for angle in range(0, 360):
-#    ax.view_init(10, angle)
-#    plt.draw()
-#    plt.pause(0.001)
-
-#plt.figure(2)
-#plt.title('original tracks')
-#plt.ylabel('lateral')
-#plt.xlabel('longitudinal')
-#plt.scatter(track_dict[0].longitudinal, track_dict[0].lateral,c='red', s=2)
-##plt.legend(loc='upper left', markerscale=6)
-#plt.show()
-
 
