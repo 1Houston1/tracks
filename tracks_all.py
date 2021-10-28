@@ -47,7 +47,12 @@ sp_all=[]
 # section local functions ----------------------------------------------------------------------------------------
 def f_CalculateData(tmp_df):
     ''' this function is called for every track to be analyzed. I generates several data e.g. distance,
-    elevation, gradient, time and speed between way points'''
+    elevation, gradient, time and speed between way points
+    @param tmp_df: dataframe which helds some data
+    @type tmp_df: pandas data frame
+    @return: eangle,dist_wp, elevation_wp, gradient_wp,time_delta_wp, speed_wp
+            calculated values based on information in pandas data frame
+    @rtype: tuple'''
 
     # init needed arrays
     angle,dist_wp,elevation_wp,gradient_wp, time_delta_wp, speed_wp = [],[], [], [],[],[]
