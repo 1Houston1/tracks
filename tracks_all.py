@@ -13,6 +13,15 @@ track_dict = {}                     # ..for entire data of track
 cols_dict={0:'blue',1:'orange',2:'green',3:'red',4:'purple',5:'brown',6:'pink',7:'olive',8:'cyan'}
 cat_dir_dict = {0:'N',1:'NO',2:'O',3:'SO',4:'S',5:'SW',6:'W',7:'NW'}
 
+cols_track = ['tr_name',
+              'tr_cum_eval',
+              'tr_highest_point',
+               'tr_lowest_point',
+              'tr_duration',
+              'tr_distance',
+              'tr_gradient',
+              'tr_import_dateTime']
+
 # set display options for pandas data frame
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -21,8 +30,6 @@ pd.set_option('display.width', 1000)
 # create empty pandas dataframe for storing all lists
 tmp_df = pd.DataFrame(columns=[])
 tracks_sum_pd = pd.DataFrame(columns=[])
-richtung_pd = pd.DataFrame(columns=[])
-angel_pd  = pd.DataFrame(columns=[])
 
 # constants
 DISTANCE = 50 # distance between way points in m (to reduce the data)
@@ -30,6 +37,7 @@ DISTANCE = 50 # distance between way points in m (to reduce the data)
 # file paths's
 FILE_PATH_GPX = 'C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap'
 FILE_PATH_CSV = 'C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap\\csv'
+FILE_STATISTICS = 'all_track_statistics.csv'
 
 # store the intermediate results in lists
 lat=[]
@@ -128,17 +136,10 @@ os.chdir(FILE_PATH_GPX)
 # read csv of track statistic to check which track has been analyzed so far and to identify later which tracks
 # are newly added in the list
 try:
-    tracks_sum_pd = pd.read_csv('tracks_sum.csv',index_col=None)
+    tracks_sum_pd = pd.read_csv(FILE_STATISTICS,index_col=None)
 except:
-    tracks_sum_pd = pd.DataFrame(columns=['tr_name',
-                               'tr_cum_eval',
-                               'tr_highest_point',
-                               'tr_lowest_point',
-                               'tr_duration',
-                               'tr_distance',
-                               'tr_gradient',
-                               'tr_import_dateTime'])
-    tracks_sum_pd.to_csv('tracks_sum.csv',index=None)
+    tracks_sum_pd = pd.DataFrame(columns=cols_track)
+    tracks_sum_pd.to_csv(FILE_STATISTICS,index=False)
 # extract the track names only to list
 track_name_l = set(tracks_sum_pd['tr_name'].to_list())
 print('\nfound recorded tracks...')
@@ -309,6 +310,10 @@ for no,f in enumerate(diff_track_list):
     # reset pandas data frame as well as data per track for next loop
     tmp_df = pd.DataFrame(columns=[])
 
-# write data to csv file
-tracks_sum_pd.to_csv('tracks_sum.csv',index=None)
+# add the newly recorded tracks to entire csv file
+tracks_sum_pd.to_csv(FILE_STATISTICS,index=False)
+
+# add the newly recorded tracks from today to own file
+FilenName = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")+'_to_be_imported.csv'
+tracks_sum_pd.to_csv(FilenName,index=False)
 
