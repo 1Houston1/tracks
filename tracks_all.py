@@ -11,6 +11,7 @@ from tracks_aux import f_CalcAngleDeg,f_FindValuesCloseToMultiple,f_CalWpDistanc
 # define some dictionary
 track_dict = {}                     # ..for entire data of track
 cols_dict={0:'blue',1:'orange',2:'green',3:'red',4:'purple',5:'brown',6:'pink',7:'olive',8:'cyan'}
+cat_dir_dict = {0:'N',1:'NO',2:'O',3:'SO',4:'S',5:'SW',6:'W',7:'NW'}
 
 # set display options for pandas data frame
 pd.set_option('display.max_rows', None)
@@ -20,12 +21,15 @@ pd.set_option('display.width', 1000)
 # create empty pandas dataframe for storing all lists
 tmp_df = pd.DataFrame(columns=[])
 tracks_sum_pd = pd.DataFrame(columns=[])
+richtung_pd = pd.DataFrame(columns=[])
+angel_pd  = pd.DataFrame(columns=[])
 
 # constants
 DISTANCE = 50 # distance between way points in m (to reduce the data)
 
 # file paths's
 FILE_PATH_GPX = 'C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap'
+FILE_PATH_CSV = 'C:\\Users\\arwe4\\OX Drive (2)\\My files\\gpx\\overlap\\csv'
 
 # store the intermediate results in lists
 lat=[]
@@ -43,6 +47,13 @@ lat_all=[]
 lon_all=[]
 elev_all=[]
 sp_all=[]
+angle_bins = [0]
+
+# generate the bins according the wind direction, see https://de.wikipedia.org/wiki/Windrichtung
+for i in range(0,360,45):
+    angle_bins.append(i+22.5)
+# loop does not include the last value, hence it is added at a last step
+angle_bins.append(360.0)
 
 # section local functions ----------------------------------------------------------------------------------------
 def f_CalculateData(tmp_df):
@@ -149,10 +160,11 @@ else:
 
 print('\nreading files...')
 for no,f in enumerate(diff_track_list):
-    print(f)
+    print('\n',f)
     gpx_file = open(f)
     gpx = gpxpy.parse(gpx_file)
 
+    # no iterate over the entire track data and extract multiple information
     for track in gpx.tracks:
         for segment in track.segments:
 
@@ -223,6 +235,7 @@ for no,f in enumerate(diff_track_list):
 
     # calculate some more data ...e.g. angle between points, distance between points, speed between points
     # elevation between points, gradient, needed time as well as speed between two way points
+    print('add more data..')
     tmp_df['angle'],\
     tmp_df['dist_wp'],\
     tmp_df['elevation_wp'],\
@@ -230,9 +243,36 @@ for no,f in enumerate(diff_track_list):
     tmp_df['time_delta_wp'],\
     tmp_df['speed_wp [km/h]']=f_CalculateData(tmp_df)
 
-    # drop the uneeded column
-    tmp_df.drop(['match multiple'],axis=1)
+    # Based on the driven angle between the last two way points the angle is now categorized
+    # and added as a new column to the pandas dataframe
+    tmp_df['cat_dir'] = pd.cut(x=tmp_df['angle'],
+                               include_lowest=True,                     # include also the lowest value to border
+                               bins=angle_bins,                         # bins according the wind direction
+                               labels=(0, 1, 2, 3, 4, 5, 6, 7, 0),      # wind direction category
+                               ordered=False)                           # allows multiple lables (due to angle jump at
+                                                                        # 0°/360°
 
+    # Previously, the angle was mapped into a direction category and now the direction category
+    # is mapped in wind directions (e.g. NO, SW, etc.) and then added to the pandas dataframe
+    tmp_df['dir']= [cat_dir_dict[i] for i in tmp_df['cat_dir'].to_list()]
+
+    # drop not needed column
+    tmp_df=tmp_df.drop(['match multiple'],axis=1)
+
+    # change now to target folder to store csv
+    os.chdir(FILE_PATH_CSV)
+    # write the current pandas dataframe of track x to csv
+    print('write track to csv..',end='')
+    tmp_df.to_csv(f+'.csv',index=None)
+    print('done..')
+    # and change back to gpx folder
+    os.chdir(FILE_PATH_GPX)
+
+    # finally copy temporay pandas data frame to dictionary (each value of dictionary helds the data of each track)
+    track_dict.update({no: tmp_df})
+
+
+    # track statistics --------------------------------------------------------------------------------------------
     # make some statistics for the track summary
     tr_name = f
     tr_cum_eval = round( float(tmp_df.tail(1)['cum_elevation [m]']),2)
@@ -258,9 +298,6 @@ for no,f in enumerate(diff_track_list):
 
     # and add them to the pandas dataframe
     tracks_sum_pd = tracks_sum_pd.append(new_row, ignore_index=True)
-
-    # copy temporay pandas data frame to dictionary (each value of dictionary helds the data of each track)
-    track_dict.update({no: tmp_df})
 
     lat_all.append(lat)
     lon_all.append(lon)

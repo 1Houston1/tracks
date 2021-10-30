@@ -87,12 +87,12 @@ bins = []
 comm = []
 comm_ =[]
 comm_a = []
+angle_bins = []
 
 # define som contants
 NO_LEN_TRACKS = []
 NO_LEN_TRACKS_COMMON = []
 START_INDEX_COMMON = []
-
 
 lat_red_all, lon_red_all, dur, elev_red_all, distance_from_start_red_all = [], [], [], [],[]
 
@@ -346,10 +346,6 @@ N0_TRACKS_TO_BE_DISPLAYES=0
 print('start looking for overlapping sections...')
 for tr in range(N0_TRACKS,1,-1):
     print('looking for multiple of',tr,'overlapping')
-    #RANGE_PERMUT = list(permutations((list(range(0,N0_TRACKS))),tr)) # make a list of possible combinations for later check
-                                                                # if a combination of points is plausible
-
-    #RANGE_PERMUT_np=np.array(RANGE_PERMUT)
 
     # do the "nearest neighbor" analysis with all way points of all tracks (stacked)
     # depending on how many tracks need to be compared
@@ -367,14 +363,17 @@ for tr in range(N0_TRACKS,1,-1):
     cols = nbrs_pd.columns
 
     # now go over all the columns
-    for col in list(cols):
+    for col in list(cols)
         # extract the way points to bins according the range where a specific way point is located
         nbrs_pd['tr'+str(col)] = pd.cut(x=nbrs_pd[col], bins=bins, labels=list(range(N0_TRACKS)), right=False)
+    print(nbrs_pd)
 
     # now iterate over the entire table, starting from the top
     for idx in nbrs_pd.index:
         # ..and extract the detected ranges of the tracks to an nd array
         t=np.array(nbrs_pd.loc[idx,'tr0':])
+
+        print(t)
 
         # now count the bins
         a = np.bincount(t)
